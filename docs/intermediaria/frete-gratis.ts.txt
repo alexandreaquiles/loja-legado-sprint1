@@ -1,0 +1,31 @@
+// Implementação de referência da Intermediária. Para usar: cp docs/intermediaria/frete-gratis.ts.txt src/plugins/cupons/frete-gratis.ts
+// e acrescente `export * from './frete-gratis';` em src/plugins/cupons/index.ts.
+// Só configuração: nenhuma action ou condition nova. A promoção é criada no dashboard (ou pelo createPromotion
+// do Admin API) com exatamente estes valores; o teste garante que a definição versionada está certa.
+import { freeShipping, LanguageCode, minimumOrderAmount, PromotionService } from '@vendure/core';
+import { cupomUnico } from './promocoes';
+
+type CreatePromotionInput = Parameters<PromotionService['createPromotion']>[1];
+
+/** R$ 100,00 em centavos, sobre o subtotal sem imposto. Ver a pergunta de negócio em docs/intermediaria/SPEC-frete-gratis.md. */
+export const FRETE_GRATIS_MINIMO_CENTAVOS = 10000;
+
+export const promocaoFreteGratis: CreatePromotionInput = {
+  enabled: true,
+  couponCode: 'FRETEGRATIS',
+  conditions: [
+    {
+      code: minimumOrderAmount.code,
+      arguments: [
+        { name: 'amount', value: String(FRETE_GRATIS_MINIMO_CENTAVOS) },
+        { name: 'taxInclusive', value: 'false' },
+      ],
+    },
+    { code: cupomUnico.code, arguments: [] },
+  ],
+  actions: [{ code: freeShipping.code, arguments: [] }],
+  translations: [
+    { languageCode: LanguageCode.pt_BR, name: 'Frete grátis', description: 'Frete grátis com o cupom FRETEGRATIS em pedidos a partir de R$ 100,00' },
+    { languageCode: LanguageCode.en, name: 'Free shipping', description: 'Free shipping with coupon FRETEGRATIS on orders from R$ 100.00' },
+  ],
+};

@@ -24,7 +24,7 @@ src/plugins/cupons/index.ts           reexporta tudo acima
 
 - R1. Teto: o percentual efetivo é `min(pct, 30)`. `pct = 50` em R$ 100,00 desconta R$ 30,00, não R$ 50,00.
 - R2. Centavos: o desconto é inteiro, arredondado com `Math.round`. 10% de R$ 33,33 (3333) = 333.
-- R3. Sinal: `execute` devolve o desconto **negativo** (R$ 30,00 → `-3000`), como toda action de pedido do Vendure. Nunca positivo.
+- R3. Sinal: `execute` devolve o desconto **negativo** (R$ 30,00 → `-3000`), como toda action de pedido do Vendure. Nunca positivo: `pct` negativo conta como 0.
 - R4. Imposto: a base é `order.subTotalWithTax` quando `ctx.channel.pricesIncludeTax` é true e `order.subTotal` quando é false (igual à `orderFixedDiscount` nativa).
 - R5. Cupom único: `cupomUnico.check` devolve `false` quando `order.couponCodes` tem mais de um código.
 - R6. Pedido vazio: `cupomUnico.check` devolve `false` quando `order.lines` está vazio.
@@ -37,14 +37,23 @@ src/plugins/cupons/index.ts           reexporta tudo acima
 - Não instalar dependências. Não tocar em `vendure.sqlite`, migrations ou `synchronize`.
 - Não criar entidade, resolver GraphQL ou endpoint: é só promoção.
 
-## Critérios de aceitação
+## Critérios de aceite
 
-Os testes em `test/cupom.test.ts` (já escritos) passam sem alteração. Os testes existentes continuam verdes. `npm run dev:server` sobe com o plugin registrado.
+Os testes em `test/cupom.test.ts` (já escritos) passam sem alteração. Os testes existentes continuam verdes. `npx tsc --noEmit` passa com o plugin registrado em `src/vendure-config.ts` (checa os tipos do plugin e do registro sem subir o servidor).
 
 ## Verificação
 
 ```bash
-npm test
+npm test && npx tsc --noEmit
 ```
 
-Pronto = `npm test` sem falhas + `git status --short` mostrando apenas `src/plugins/cupons/` e `src/vendure-config.ts`.
+Pronto = os dois comandos sem erro + `git status --short` mostrando apenas `src/plugins/cupons/`, `src/vendure-config.ts` e o plano em `docs/plano.md`.
+
+## O que o verde não prova
+
+Os testes provam que a action nova respeita o teto. Eles não provam a regra de negócio do contexto ("ninguém consegue configurar desconto acima de 30%"):
+
+- As actions nativas continuam registradas (R7 manda somar, não substituir): `order_percentage_discount`, `products_percentage_discount` e `facet_based_discount` aceitam qualquer percentual no dashboard.
+- `cupom_unico` só vale na promoção que a inclui. Duas promoções de 30% sem cupom, ou com a condition só numa delas, somam 60% no mesmo pedido.
+
+Fechar essas brechas muda a spec (remover ou envolver as actions nativas, ou validar no `PromotionService`) e pede um teste com a loja de verdade (e2e com `@vendure/testing`). Fica fora desta tarefa, como decisão para o financeiro.

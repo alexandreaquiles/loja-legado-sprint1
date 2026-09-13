@@ -5,3 +5,4 @@ dist
 static/email/test-emails
 .vendure/
 .claude/settings.local.json
+.claude/.loop-count

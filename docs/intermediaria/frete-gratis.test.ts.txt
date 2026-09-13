@@ -1,0 +1,63 @@
+// Teste de referência da Intermediária (frete grátis). Para usar: cp docs/intermediaria/frete-gratis.test.ts.txt test/frete-gratis.test.ts
+// Falha antes da feature (src/plugins/cupons/frete-gratis.ts não existe) e passa com a referência em frete-gratis.ts.txt.
+import { describe, it, expect } from 'vitest';
+import {
+  Order, Promotion, PromotionState, RequestContext, RuntimeVendureConfig, ShippingLine,
+  defaultPromotionActions, defaultPromotionConditions, freeShipping, minimumOrderAmount,
+} from '@vendure/core';
+import { configurarCupons, cupomUnico, promocaoFreteGratis, FRETE_GRATIS_MINIMO_CENTAVOS } from '../src/plugins/cupons';
+
+// Objetos falsos: só o que as conditions e a action leem. Sem banco, sem NestJS.
+const ctx = { channel: { pricesIncludeTax: false } } as unknown as RequestContext;
+const pedido = (subTotal: number, couponCodes = ['FRETEGRATIS']) =>
+  ({ subTotal, subTotalWithTax: Math.round(subTotal * 1.1), couponCodes, lines: [{}] }) as unknown as Order;
+const promo = {} as Promotion;
+
+// A loja de verdade: nativas do Vendure + o que o plugin cupons acrescenta.
+const config = configurarCupons({
+  promotionOptions: { promotionActions: [...defaultPromotionActions], promotionConditions: [...defaultPromotionConditions] },
+} as unknown as RuntimeVendureConfig);
+const conditions = config.promotionOptions.promotionConditions!;
+const actions = config.promotionOptions.promotionActions!;
+
+// Avalia as conditions da definição do mesmo jeito que a Promotion faz: todas precisam passar.
+async function elegivel(order: Order) {
+  for (const c of promocaoFreteGratis.conditions) {
+    const def = conditions.find((d) => d.code === c.code);
+    if (!def) throw new Error(`condition ${c.code} não está registrada`);
+    if (!(await def.check(ctx, order, c.arguments, promo))) return false;
+  }
+  return true;
+}
+
+describe('promoção FRETEGRATIS', () => {
+  it('é um cupom FRETEGRATIS ativo', () => {
+    expect(promocaoFreteGratis.couponCode).toBe('FRETEGRATIS');
+    expect(promocaoFreteGratis.enabled).toBe(true);
+  });
+
+  it('usa só o que já existe: free_shipping e minimum_order_amount nativas, mais cupom_unico do plugin', () => {
+    expect(promocaoFreteGratis.actions.map((a) => a.code)).toEqual([freeShipping.code]);
+    expect(promocaoFreteGratis.conditions.map((c) => c.code)).toEqual([minimumOrderAmount.code, cupomUnico.code]);
+    for (const a of promocaoFreteGratis.actions) expect(actions.map((d) => d.code)).toContain(a.code);
+  });
+
+  it('mínimo de R$ 100,00 no subtotal sem imposto', async () => {
+    expect(FRETE_GRATIS_MINIMO_CENTAVOS).toBe(10000);
+    expect(await elegivel(pedido(9999))).toBe(false);
+    expect(await elegivel(pedido(10000))).toBe(true);
+  });
+
+  it('continua sujeita a um cupom por pedido', async () => {
+    expect(await elegivel(pedido(15000, ['FRETEGRATIS', 'ALURA10']))).toBe(false);
+  });
+
+  it('zera o frete e não mexe no subtotal', async () => {
+    const def = actions.find((d) => d.code === promocaoFreteGratis.actions[0].code)!;
+    const linhaFrete = { price: 1990, priceWithTax: 2189, listPriceIncludesTax: false } as unknown as ShippingLine;
+    const order = pedido(12000);
+    const desconto = await (def as typeof freeShipping).execute(ctx, linhaFrete, order, promocaoFreteGratis.actions[0].arguments, {} as PromotionState, promo);
+    expect(desconto).toBe(-1990);
+    expect(order.subTotal).toBe(12000);
+  });
+});
