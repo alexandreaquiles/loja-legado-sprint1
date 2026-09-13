@@ -53,12 +53,21 @@ function rodarTestes() {
   });
   const saida = `${r.stdout ?? ''}\n${r.stderr ?? ''}`.replace(/\x1b\[[0-9;]*m/g, '');
   const linha = saida.match(/^\s*Tests\s+(.+)$/m)?.[1] ?? '';
-  const num = (rotulo) => Number(linha.match(new RegExp(`(\\d+) ${rotulo}`))?.[1] ?? 0);
+  const arquivos = saida.match(/^\s*Test Files\s+(.+)$/m)?.[1] ?? '';
+  const num = (texto, rotulo) => Number(texto.match(new RegExp(`(\\d+) ${rotulo}`))?.[1] ?? 0);
   return (cacheTestes = {
     rodou: linha !== '', verde: r.status === 0 && linha !== '',
-    passaram: num('passed'), falharam: num('failed'), segundos: (Date.now() - inicio) / 1000,
+    passaram: num(linha, 'passed'), falharam: num(linha, 'failed'), arquivosQuebrados: num(arquivos, 'failed'),
+    segundos: (Date.now() - inicio) / 1000,
     motivo: linha ? '' : saida.trim().split('\n').slice(-3).join(' '),
   });
+}
+
+function descreverFalha(t) {
+  const partes = [`${t.passaram} verdes`];
+  if (t.falharam) partes.push(`${t.falharam} falhando`);
+  if (t.arquivosQuebrados && !t.falharam) partes.push(`${t.arquivosQuebrados} arquivo(s) de teste sem carregar`);
+  return partes.join(', ');
 }
 
 function lerJson(...p) {
@@ -107,7 +116,7 @@ card('00', 'Preparar o ambiente', () => {
   const t = rodarTestes();
   if (!t.rodou) r.push(falha('npm test não rodou', `${t.motivo || 'veja a saída de npm test'}`));
   else if (t.verde) r.push(ok(`npm test roda: ${t.passaram} testes verdes em ${t.segundos.toFixed(1).replace('.', ',')} s`));
-  else r.push(ok(`npm test roda: ${t.passaram} verdes, ${t.falharam} falhando (normal entre os cards 01 e 04)`));
+  else r.push(ok(`npm test roda: ${descreverFalha(t)} (normal entre os cards 01 e 04)`));
   return r;
 });
 
@@ -256,7 +265,7 @@ card('04', 'Loop: implementar até verde', () => {
     else r.push(original.replace(/\r\n/g, '\n') === teste.replace(/\r\n/g, '\n') ? ok('test/cupom.test.ts igual ao do gabarito (não foi alterado)') : falha('test/cupom.test.ts foi alterado', 'o critério é passar sem mexer nos testes: git diff gabarito -- test/cupom.test.ts'));
     const t = rodarTestes();
     if (!t.rodou) r.push(falha('npm test não rodou', t.motivo));
-    else r.push(t.verde ? ok(`npm test verde: ${t.passaram} testes`) : falha(`npm test: ${t.falharam} falhando, ${t.passaram} passando`, 'o stop-gate devolve as falhas ao agente; confira o circuit breaker'));
+    else r.push(t.verde ? ok(`npm test verde: ${t.passaram} testes`) : falha(`npm test vermelho: ${descreverFalha(t)}`, 'o stop-gate devolve as falhas ao agente; confira o circuit breaker'));
   }
   return r;
 });
