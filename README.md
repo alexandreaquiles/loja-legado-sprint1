@@ -20,8 +20,9 @@ Você precisa de Node.js 22.12 ou mais novo, git e [Claude Code](https://code.cl
 git clone https://github.com/alexandreaquiles/loja-legado-sprint1.git
 cd loja-legado-sprint1
 npm install       # ~2 minutos e ~800 MB: o Vendure inteiro vem em node_modules
-npm run setup     # cria o .env (segredos falsos) e o vendure.sqlite (54 produtos de exemplo)
-npm test          # 5 testes verdes, em menos de 1 segundo
+npm run setup     # branches locais, .env (segredos falsos) e vendure.sqlite (54 produtos de exemplo)
+npm test          # 5 testes verdes (vitest, cerca de 1 segundo)
+npm run conferir  # confere os cards 00 a 04: no começo só o 00 fica todo ✔
 npm run dev       # sobe a loja: http://localhost:3000/dashboard (superadmin / superadmin)
 claude            # abre o agente na raiz do projeto
 ```
@@ -35,19 +36,21 @@ Copie o board do Trello para a sua conta e mova os cards. Resumo:
 | # | tarefa | etiqueta |
 |---|---|---|
 | 00 | Preparar o ambiente | Essencial |
-| 01 | Sentir o problema: pedido vago com o `CLAUDE.md` inchado, medir com `/context` e `/cost` | Essencial |
-| 02 | Harness: `CLAUDE.md` enxuto (até 60 linhas), hooks que bloqueiam e que testam, subagente revisor | Essencial |
-| 03 | Spec: `SPEC.md` do cupom com teto e `test/cupom.test.ts` como critério de aceite | Essencial |
-| 04 | Loop: implementar `src/plugins/cupons/` com o loop fechado e comparar o custo com a tarefa 01 | Essencial |
+| 01 | Sentir o problema: pedido vago com o `CLAUDE.md` inchado, medindo contexto e custo estimado (statusline e `/context`) | Essencial |
+| 02 | Harness: `CLAUDE.md` enxuto (até 1.500 tokens estimados) com as regras no `AGENTS.md`, hooks que bloqueiam e que testam, subagente `revisor-codigo` | Essencial |
+| 03 | Spec e plano: `SPEC.md` do cupom com teto, `docs/plano.md` e `test/cupom.test.ts` como critério de aceite | Essencial |
+| 04 | Loop: implementar `src/plugins/cupons/` com o loop fechado e comparar com o card 01 | Essencial |
 | 05 | Intermediária: spec de 5 linhas para o cupom de frete grátis (feito na aula ao vivo) | Intermediária |
-| 06 | Desafio: Harness Challenge no seu próprio repositório (badges 🧱 📐 🔁 🏆) | Desafio |
+| 06 | Desafio em 3 níveis, no seu repositório ou no `loja-legado` | Desafio |
+
+Cada card termina com `npm run conferir -- NN` (por exemplo `npm run conferir -- 02`): ✔ feito, ✘ falta, … depende de outro card. É feedback, não nota: nada ali usa LLM nem lê o seu `.env`.
 
 As tarefas essenciais são as que o professor resolve ao vivo na quinta. Tente antes: a aula rende muito mais quando você já esbarrou no problema.
 
 ## Branches
 
 - `main`: o estado inicial, como o time deixou.
-- `gabarito`: uma solução de referência para as tarefas 02 a 04 (harness, spec e implementação). Vale mais espiar depois de tentar.
+- `gabarito`: uma solução de referência para os cards 02 a 04 (harness, spec, plano e implementação) e a referência da Intermediária em `docs/intermediaria/`. Vale mais espiar depois de tentar: `git show gabarito:<arquivo>`.
 
 ## Como entregar o Desafio
 

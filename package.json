@@ -12,7 +12,8 @@
     "start": "vendure start all",
     "test": "vitest run --config vitest.config.mts",
     "test:watch": "vitest --config vitest.config.mts",
-    "setup": "node scripts/setup.js"
+    "setup": "node scripts/setup.js",
+    "conferir": "node scripts/conferir.mjs"
   },
   "dependencies": {
     "@vendure/asset-server-plugin": "3.7.3",
