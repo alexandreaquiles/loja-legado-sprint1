@@ -24,6 +24,7 @@ const arq = (...p) => path.join(raiz, ...p);
 const existe = (...p) => fs.existsSync(arq(...p));
 const ler = (...p) => { try { return fs.readFileSync(arq(...p), 'utf8'); } catch { return null; } };
 const tokens = (texto) => Math.round(texto.length / 4 / 100) * 100;
+const linhas = (texto) => texto.split('\n').length - (texto.endsWith('\n') ? 1 : 0);
 const milhar = (n) => n.toLocaleString('pt-BR');
 const semAcento = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -127,7 +128,7 @@ card('01', 'Sentir o problema', () => {
     ? ok(`statusline configurada: ${s.statusLine.command} (custo estimado e contexto no rodapé)`)
     : falha('statusLine não está em .claude/settings.json', 'git checkout main -- .claude/settings.json .claude/statusline.mjs'));
   const claude = ler('CLAUDE.md');
-  if (claude !== null) r.push(ok(`CLAUDE.md atual: ~${milhar(tokens(claude))} tokens estimados, ${claude.split('\n').length} linhas (anote no placar)`));
+  if (claude !== null) r.push(ok(`CLAUDE.md atual: ~${milhar(tokens(claude))} tokens estimados, ${linhas(claude)} linhas (anote no placar)`));
   r.push(temBranch('gabarito') && git('cat-file', '-e', 'gabarito:test/cupom.test.ts') !== null
     ? ok('teste de aceite disponível: git show gabarito:test/cupom.test.ts')
     : falha('não achei test/cupom.test.ts na branch gabarito', 'rode npm run setup para criar a branch local'));
