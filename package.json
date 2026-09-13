@@ -1,0 +1,34 @@
+{
+  "name": "loja-legado",
+  "version": "2.0.0-legado",
+  "description": "Loja da empresa, migrada para o Vendure em 2024 (legado)",
+  "private": true,
+  "scripts": {
+    "dev": "vendure dev all",
+    "dev:server": "vendure dev server",
+    "dev:worker": "vendure dev worker",
+    "dev:dashboard": "vendure dev dashboard",
+    "build": "vendure build all",
+    "start": "vendure start all",
+    "test": "vitest run --config vitest.config.mts",
+    "test:watch": "vitest --config vitest.config.mts",
+    "setup": "node scripts/setup.js"
+  },
+  "dependencies": {
+    "@vendure/asset-server-plugin": "3.7.3",
+    "@vendure/core": "3.7.3",
+    "@vendure/dashboard": "3.7.3",
+    "@vendure/email-plugin": "3.7.3",
+    "@vendure/graphiql-plugin": "3.7.3",
+    "better-sqlite3": "12.11.1",
+    "dotenv": "17.4.2"
+  },
+  "devDependencies": {
+    "@vendure/cli": "3.7.3",
+    "ts-node": "10.9.2",
+    "typescript": "5.8.2",
+    "vite": "7.3.6",
+    "vitest": "^3.2.7"
+  },
+  "license": "GPL-3.0-only"
+}
