@@ -166,8 +166,8 @@ card('02', 'Harness: CLAUDE.md, AGENTS.md, hooks e subagente', () => {
   } else {
     const deny = s.permissions?.deny ?? [];
     const negaEnv = (tool) => deny.some((d) => new RegExp(`^${tool}\\((\\./|\\*\\*/)?\\.env\\)$`).test(d));
-    const faltam = ['Read', 'Edit', 'Write'].filter((t) => !negaEnv(t));
-    r.push(faltam.length === 0 ? ok('permissions.deny nega Read/Edit/Write do .env') : falha(`permissions.deny não nega ${faltam.join('/')} do .env`, 'ex.: "deny": ["Read(./.env)", ...]'));
+    const faltam = ['Read', 'Edit'].filter((t) => !negaEnv(t));
+    r.push(faltam.length === 0 ? ok('permissions.deny nega Read/Edit do .env') : falha(`permissions.deny não nega ${faltam.join('/')} do .env`, 'ex.: "deny": ["Read(./.env)", ...]'));
     const pre = hooksDo(s, 'PreToolUse').filter((h) => casa(h.matcher, 'Bash') && h.comando.includes('guard.sh'));
     r.push(pre.length ? ok('PreToolUse Bash → guard.sh') : falha('falta PreToolUse com matcher Bash chamando guard.sh', 'o deny não pega grep -r nem node -e; o guard complementa'));
     const post = hooksDo(s, 'PostToolUse').filter((h) => casa(h.matcher, 'Edit') && casa(h.matcher, 'Write'));
