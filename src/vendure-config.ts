@@ -9,6 +9,7 @@ import { defaultEmailHandlers, EmailPlugin, FileBasedTemplateLoader } from '@ven
 import { AssetServerPlugin } from '@vendure/asset-server-plugin';
 import { DashboardPlugin } from '@vendure/dashboard/plugin';
 import { GraphiqlPlugin } from '@vendure/graphiql-plugin';
+import { CuponsPlugin } from './plugins/cupons';
 import 'dotenv/config';
 import path from 'path';
 
@@ -64,9 +65,9 @@ export const config: VendureConfig = {
     },
     // When adding or altering custom field definitions, the database will
     // need to be updated. See the "Migrations" section in README.md.
-    // TODO(Fulano, 2025): cupons. Tentamos em src/stuff/carrinho-antigo.ts, nao deu certo. Ver com o Fulano.
     customFields: {},
     plugins: [
+        CuponsPlugin,
         GraphiqlPlugin.init(),
         AssetServerPlugin.init({
             route: 'assets',

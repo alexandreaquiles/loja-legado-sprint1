@@ -1,51 +1,43 @@
-# Sobre o projeto
+# loja-legado
 
-Este é um projeto de software moderno que usa tecnologias recentes e segue boas práticas de desenvolvimento. O time é comprometido com qualidade e entrega de valor para os usuários. Somos apaixonados por código limpo e por resolver problemas reais dos nossos clientes com excelência. A loja roda em cima do Vendure, que é um framework de e-commerce headless muito bom, moderno, escalável e amplamente adotado no mercado.
+Loja em **Vendure 3.7** (TypeScript, NestJS, GraphQL, TypeORM) com SQLite. Dinheiro é sempre **inteiro em centavos** ("minor units" do Vendure); arredondar com `Math.round`.
 
-# Regras gerais
+@AGENTS.md
 
-- Sempre escreva código limpo e legível.
-- Siga as boas práticas do mercado.
-- Seja cuidadoso ao fazer mudanças.
-- Pense bem antes de responder.
-- Faça o melhor que puder.
-- Nunca esqueça de testar.
-- Lembre-se de documentar o código.
-- Use nomes descritivos.
-- Evite funções muito longas.
-- Prefira soluções simples quando possível.
-- Não use código desnecessário.
-- Tente manter a consistência com o restante do projeto.
-- Use TypeScript do jeito certo.
+## Comandos
 
-# Sobre o código
+```bash
+npm test          # vitest, ~1 s (obrigatório antes de dizer que terminou)
+npm run dev       # server em :3000 + worker + dashboard (/dashboard, superadmin/superadmin)
+npm run setup     # recria .env e vendure.sqlite a partir do seed
+```
 
-O código deve ser bem organizado. Use variáveis com nomes descritivos. Evite funções muito longas. Prefira soluções simples quando possível. Não use código desnecessário. Tente manter a consistência com o restante do projeto. Aplique SOLID, DRY, KISS, YAGNI, Clean Architecture, DDD e Hexagonal sempre que fizer sentido. Pense em performance, escalabilidade, manutenibilidade, segurança, acessibilidade e observabilidade. Use os padrões do NestJS, do TypeORM, do GraphQL e do Vendure.
+## Onde as coisas ficam
 
-# Testes
+```
+src/vendure-config.ts      registra plugins; único arquivo fora de src/plugins/ que pode mudar
+src/plugins/<dominio>/     código nosso, um plugin por domínio (VendurePlugin + configuration)
+src/misc/preco.ts          helpers antigos (aplicarDesconto, frete); o financeiro usa; NÃO alterar
+src/stuff/, src/utils/     legado da migração; não criar nada aqui
+test/                      vitest, um arquivo por feature; ctx e order são objetos falsos, sem banco
+node_modules/@vendure/core/dist/config/promotion/   exemplos oficiais de PromotionCondition e
+                           PromotionAction: leia min-order-amount-condition.js e
+                           order-percentage-discount-action.js antes de escrever os seus
+```
 
-Sempre escreva testes para seu código. Testes são importantes para garantir a qualidade do software. Tente ter boa cobertura de testes. Use testes unitários, de integração e end-to-end quando necessário. Testes devem ser rápidos, isolados, repetíveis, auto-verificáveis e oportunos (FIRST). Considere usar Jest, Vitest, Mocha, Cypress ou Playwright.
+## Regras do projeto
 
-# Git e commits
+- Promoções: nunca reimplementar o que a `Promotion` do Vendure já faz (código do cupom, `startsAt`/`endsAt`, `usageLimit`, `perCustomerUsageLimit`). Regra de negócio nova = `PromotionCondition` ou `PromotionAction` registrada pelo plugin em `config.promotionOptions`, somando às nativas.
+- Action de pedido devolve número **negativo** em centavos (convenção do Vendure).
+- Respeitar `ctx.channel.pricesIncludeTax`: base é `order.subTotalWithTax` quando true, `order.subTotal` quando false.
+- `code` em snake_case; `description` em `pt_BR` e `en`.
+- Regras puras (só números) ficam em `regras.ts`, sem importar o Vendure, para testar sem banco.
+- Especificações ficam em `SPEC.md`. Implementar somente o que está lá.
 
-Use mensagens de commit descritivas. Faça commits pequenos e frequentes. Siga o GitFlow. Não commite código quebrado. Revise o código antes de fazer push. Use branches para novas features. Escreva mensagens de commit no imperativo. Referencie o ticket no commit.
+## Nunca
 
-# Segurança
-
-Pense em segurança. Não exponha dados sensíveis. Valide as entradas do usuário. Use variáveis de ambiente para configurações importantes. Siga o OWASP Top 10. Sanitize inputs. Escape outputs. Use HTTPS. Faça rate limiting. Use autenticação forte. Cuidado com injection no GraphQL.
-
-# Sobre a IA
-
-Você é um assistente de programação especialista, sênior, com 15 anos de experiência em TypeScript, Node.js, NestJS, GraphQL, e-commerce, arquitetura de sistemas, performance e segurança. Você deve ajudar o desenvolvedor da melhor forma possível. Use seu conhecimento para entregar soluções de alta qualidade. Seja preciso e detalhado nas respostas. Explique o que você está fazendo em cada passo. Seja rigoroso mas gentil. Considere o contexto da aplicação inteira ao fazer suas recomendações.
-
-# Histórico do projeto
-
-A loja começou em 2019 como um script em PHP que rodava no servidor do Fulano. Em 2021 foi migrada para Node.js pela equipe do Ciclano (o carrinho daquela época ainda está em `src/stuff/`). Em 2022 tentamos migrar para TypeScript mas desistimos. Em 2024 o Beltrano migrou tudo para o Vendure, mas só metade do catálogo entrou e o relatório do financeiro continua usando os helpers antigos de `src/misc/`. Existe uma pasta antiga chamada `legacy-php` que já foi apagada mas ainda é mencionada em alguns comentários. O módulo de cupons foi prometido para o Q3 de 2024, depois Q1 de 2025, depois Q4 de 2025; o Fulano começou em `src/stuff/carrinho-antigo.ts` e parou. O cliente reclamou três vezes. O PO atual é a Sicrana. A stakeholder de negócios é a Dona Maria do financeiro, que se preocupa muito com descontos abusivos porque em 2022 um cupom deu 100% de desconto e a loja perdeu R$ 40 mil em um fim de semana.
-
-# API do Vendure (lista completa de queries e mutations que usamos)
-
-Shop API: activeOrder, activeChannel, activeCustomer, product, products, collection, collections, search, facets, eligibleShippingMethods, eligiblePaymentMethods, availableCountries, orderByCode, me, nextOrderStates, addItemToOrder, adjustOrderLine, removeOrderLine, removeAllOrderLines, applyCouponCode, removeCouponCode, setOrderShippingAddress, setOrderBillingAddress, setOrderShippingMethod, addPaymentToOrder, transitionOrderToState, setCustomerForOrder, login, logout, registerCustomerAccount, verifyCustomerAccount, refreshCustomerVerification, requestPasswordReset, resetPassword, updateCustomer, updateCustomerPassword, requestUpdateCustomerEmailAddress, updateCustomerEmailAddress, createCustomerAddress, updateCustomerAddress, deleteCustomerAddress.
-
-Admin API: administrators, administrator, activeAdministrator, assets, asset, channels, channel, collections, collection, countries, country, customerGroups, customerGroup, customers, customer, facets, facet, globalSettings, job, jobs, jobsById, jobQueues, order, orders, paymentMethods, paymentMethod, productOptionGroups, productOptionGroup, search, products, product, productVariants, productVariant, promotion, promotions, promotionConditions, promotionActions, provinces, province, roles, role, sellers, seller, shippingMethods, shippingMethod, shippingEligibilityCheckers, shippingCalculators, fulfillmentHandlers, stockLocations, stockLocation, tags, tag, taxCategories, taxCategory, taxRates, taxRate, zones, zone, me, testShippingMethod, testEligibleShippingMethods, pendingSearchIndexUpdates, metricSummary, entityDuplicators, scheduledTasks.
-
-(o Vendure já conhece tudo isso, mas achamos bom deixar registrado aqui para contexto)
+- Instalar dependências (`npm install`, `npm add`) sem confirmar com o dev.
+- Ler ou commitar `.env`.
+- Apagar ou recriar `vendure.sqlite`; rodar migrations ou ligar `synchronize`.
+- Criar endpoint, entidade ou migration para a tarefa atual: é só promoção.
+- Declarar a tarefa concluída sem `npm test` verde.
