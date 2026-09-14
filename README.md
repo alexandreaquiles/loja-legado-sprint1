@@ -6,7 +6,7 @@ Este é o repositório do projeto prático da Sprint 1: a loja da empresa, migra
 
 | | |
 |---|---|
-| Board do projeto (Trello) | https://trello.com/b/ghDlkH0J |
+| Board do projeto (Trello) | https://trello.com/b/x |
 | Curso base na Alura | [Engenharia de software na era da IA: context engineering, workflows e controle de custo](https://cursos.alura.com.br/course/context-engineering-workflows) (10h estimadas) |
 | Lançamento | segunda, 21/09/2026 |
 | Aula ao vivo | quinta, 01/10/2026, 9h–10h |
