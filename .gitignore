@@ -5,3 +5,8 @@ dist
 static/email/test-emails
 .vendure/
 .claude/settings.local.json
+.claude/.loop-count
+# gerados pelo npm run dev (codegen do dashboard, cache do router, cache de imagens)
+src/gql/
+.tanstack/
+static/assets/cache/

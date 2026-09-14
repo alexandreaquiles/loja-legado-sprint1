@@ -29,8 +29,16 @@ if (!fs.existsSync(path.join(raiz, 'node_modules', '@vendure', 'core'))) {
   process.exit(1);
 }
 if (!fs.existsSync(path.join(raiz, '.env'))) {
-  fs.copyFileSync(path.join(raiz, '.env.example'), path.join(raiz, '.env'));
-  passo('.env criado a partir do .env.example (segredos falsos, só para o exercício)');
+  // O .env.example versionado só tem "coloque-..."; os valores falsos existem só no .env (fora do git).
+  // Assim quem lê o .env.example (permitido pelo guard) não descobre a chave que está no .env.
+  const FALSOS = {
+    COOKIE_SECRET: 'cookie-secret-falso-so-para-o-exercicio',
+    PAGAMENTO_API_KEY: 'sk_test_fake_loja_legado_7f3a9c2e41',
+  };
+  const modelo = fs.readFileSync(path.join(raiz, '.env.example'), 'utf8');
+  const env = modelo.replace(/^(\w+)=coloque-.*$/gm, (linha, chave) => (FALSOS[chave] ? `${chave}=${FALSOS[chave]}` : linha));
+  fs.writeFileSync(path.join(raiz, '.env'), env);
+  passo('.env criado a partir do .env.example (valores falsos, só para o exercício)');
 } else {
   passo('.env já existe');
 }

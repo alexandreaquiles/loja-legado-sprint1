@@ -185,14 +185,14 @@ card('02', 'Harness: CLAUDE.md, AGENTS.md, hooks e subagente', () => {
       r.push(semX.length === 0 ? ok('hooks executáveis') : falha(`sem permissão de execução: ${semX.join(', ')}`, 'chmod +x .claude/hooks/*.sh'));
     }
     const casos = [
-      ['cat .env', 2], ['grep -rn process.env src', 0], ['cat .env.example', 0],
+      ['cat .env', 2], ['grep -r PAGAMENTO .', 2], ['grep -rn process.env src', 0], ['cat .env.example', 0],
     ];
     for (const [cmd, esperado] of casos) {
       const x = bash(guard, jsonBash(cmd));
       if (x.erro) { r.push(falha(`guard.sh não rodou: ${x.erro}`)); break; }
       r.push(x.status === esperado
         ? ok(`guard.sh: \`${cmd}\` → exit ${esperado}${esperado === 2 ? ' (bloqueia)' : ' (passa)'}`)
-        : falha(`guard.sh: \`${cmd}\` → exit ${x.status}, esperado ${esperado}`, esperado === 2 ? 'exit 2 bloqueia e devolve o stderr ao agente' : 'case por caminho/token, não por substring: process.env e .env.example não são o .env'));
+        : falha(`guard.sh: \`${cmd}\` → exit ${x.status}, esperado ${esperado}`, esperado === 2 ? (cmd.startsWith('grep') ? 'a busca recursiva a partir da raiz atravessa o .env, e o deny não pega: exit 2' : 'exit 2 bloqueia e devolve o stderr ao agente') : 'case por caminho/token, não por substring: process.env e .env.example não são o .env'));
     }
   }
 
