@@ -3,15 +3,16 @@
 Plano em arquivo, escrito antes de implementar (curso, seção 3 · Sessão, compactação e subagents, aula «Planejamento primeiro»). Prompt que gerou este plano, em sessão nova e fora do plan mode:
 
 ```
-Leia AGENTS.md, SPEC.md, test/cupom.test.ts e os exemplos oficiais citados no AGENTS.md.
-Escreva o plano de implementação em docs/plano.md: arquivos, ordem, qual regra (R1..R7)
-cada passo cobre, como verificar e perguntas abertas. Não implemente.
+Leia AGENTS.md, SPEC.md, o teste de aceite (git show gabarito:test/cupom.test.ts) e os
+exemplos oficiais citados no AGENTS.md. Escreva o plano de implementação em docs/plano.md:
+arquivos, ordem, qual regra (R1..R7) cada passo cobre, como verificar e perguntas abertas.
+Não implemente.
 ```
 
 ## O que já existe e vou reaproveitar
 
 - `PromotionOrderAction` e `PromotionCondition` de `@vendure/core`, no mesmo formato de `order-percentage-discount-action.js` e `min-order-amount-condition.js`.
-- `test/cupom.test.ts` já importa `descontoPercentualComTeto`, `cupomUnico` e `configurarCupons` de `src/plugins/cupons`: os nomes estão decididos pelo teste.
+- O teste de aceite (`git show gabarito:test/cupom.test.ts`, ainda fora da árvore) já importa `descontoPercentualComTeto`, `cupomUnico` e `configurarCupons` de `src/plugins/cupons`: os nomes estão decididos pelo teste.
 - A `Promotion` nativa cuida de código, datas e limites de uso. Nada disso entra no plugin.
 
 ## Desenho

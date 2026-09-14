@@ -47,7 +47,7 @@ Os testes em `test/cupom.test.ts` (já escritos) passam sem alteração. Os test
 npm test && npx tsc --noEmit
 ```
 
-Pronto = os dois comandos sem erro + `git status --short` mostrando apenas `src/plugins/cupons/`, `src/vendure-config.ts` e o plano em `docs/plano.md`.
+Pronto = os dois comandos sem erro + `git status --short` mostrando, além dos arquivos do harness (`CLAUDE.md`, `AGENTS.md`, `.claude/`), da spec (`SPEC.md`) e do teste de aceite (`test/cupom.test.ts`), apenas `src/plugins/cupons/`, `src/vendure-config.ts` e o plano em `docs/plano.md`.
 
 ## O que o verde não prova
 
