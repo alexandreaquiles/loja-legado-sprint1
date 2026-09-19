@@ -17,7 +17,7 @@ const estrito = args.includes('--estrito');
 const filtro = args.filter((a) => /^\d{1,2}$/.test(a)).map((a) => a.padStart(2, '0'));
 
 const TETO_TOKENS_CLAUDE_MD = 1500;
-const TETO_TOKENS_MEMORIA = 2500; // CLAUDE.md + AGENTS.md importado: mover o despejo para o AGENTS.md não vale
+const TETO_TOKENS_MEMORIA = 2500; // CLAUDE.md + AGENTS.md importado: mover o calhamaço para o AGENTS.md não vale
 
 // ---------- utilitários ----------
 const arq = (...p) => path.join(raiz, ...p);
@@ -149,7 +149,7 @@ card('02', 'Harness: CLAUDE.md, AGENTS.md, hooks e subagente', () => {
   const tkMem = tokens(claude + agents);
   r.push(tkMem <= TETO_TOKENS_MEMORIA
     ? ok(`CLAUDE.md + AGENTS.md com ~${milhar(tkMem)} tokens estimados (teto ${milhar(TETO_TOKENS_MEMORIA)})`)
-    : falha(`CLAUDE.md + AGENTS.md com ~${milhar(tkMem)} tokens estimados (teto ${milhar(TETO_TOKENS_MEMORIA)})`, 'o @AGENTS.md entra inteiro no contexto: mover o despejo para lá não enxuga nada'));
+    : falha(`CLAUDE.md + AGENTS.md com ~${milhar(tkMem)} tokens estimados (teto ${milhar(TETO_TOKENS_MEMORIA)})`, 'o @AGENTS.md entra inteiro no contexto: mover o calhamaço para lá não enxuga nada'));
   const genericas = ['Siga as boas práticas do mercado', 'Sempre escreva código limpo', 'Você é um assistente de programação', 'lista completa de queries e mutations'];
   const achadas = genericas.filter((g) => claude.includes(g) || agents.includes(g));
   r.push(achadas.length === 0 ? ok('sem regras genéricas nem API colada') : falha(`ainda tem: "${achadas[0]}"`, 'curso, seção 2 · Guiando o entrypoint do agente, aula «Guia de boas e más práticas»'));
